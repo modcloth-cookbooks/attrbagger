@@ -5,10 +5,10 @@ require 'chef/mixin/deep_merge'
 describe Attrbagger do
   subject :loader do
     described_class.new(
-      context: run_context,
-      data_bag: data_bag_name,
-      base_config: base_config_name,
-      env_config: env_config_name
+      :context => run_context,
+      :data_bag => data_bag_name,
+      :base_config => base_config_name,
+      :env_config => env_config_name
     )
   end
 
