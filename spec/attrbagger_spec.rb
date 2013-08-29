@@ -15,7 +15,7 @@ describe Attrbagger do
   let :loader_from_bag_cascade do
     described_class.new(
       :context => run_context,
-      :bag_cascade => bag_cascade,
+      :bag_cascade => bag_cascade
     )
   end
 
