@@ -6,29 +6,30 @@ require 'chef/mixin/deep_merge'
 class Attrbagger
   def initialize(options = {})
     @context = options.fetch(:context)
-    @data_bag = options.fetch(:data_bag)
-    @base_config = options.fetch(:base_config)
-    @env_config = options.fetch(:env_config)
+    if options[:bag_cascade]
+      @bag_cascade = options[:bag_cascade]
+    else
+      @bag_cascade = %W(
+        #{options.fetch(:data_bag)}:#{options.fetch(:base_config)}
+        #{options.fetch(:data_bag)}:#{options.fetch(:env_config)}
+      )
+    end
   end
 
   def load_config
     Chef::Mixin::DeepMerge.merge(
-      load_base_config,
-      load_env_config
+      *(@bag_cascade.map { |s| load_data_bag_item_from_string(s) })
     )
   end
 
   private
-  def load_base_config
-    load_data_bag_item(@base_config)
+  def load_data_bag_item_from_string(bag_string)
+    bag_name, item_name = bag_string.split(':')
+    load_data_bag_item(bag_name, item_name)
   end
 
-  def load_env_config
-    load_data_bag_item(@env_config)
-  end
-
-  def load_data_bag_item(item_name)
-    @context.data_bag_item(@data_bag, item_name).reject do |key,_|
+  def load_data_bag_item(bag_name, item_name)
+    @context.data_bag_item(bag_name, item_name).reject do |key,_|
       %(id chef_type data_bag).include?(key)
     end
   rescue StandardError => e
