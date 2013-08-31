@@ -1,26 +1,27 @@
 describe 'attrbagger::default' do
   let :chef_run do
     ChefSpec::ChefRunner.new do |node|
-      node.set['flurb'] = {'foop' => {'bones' => 2}}
-      node.set['attrbagger']['configs']['flurb::foop'] = [
+      node.normal['flurb']['foop']['buzz'] = 2
+      node.normal['attrbagger']['configs']['flurb::foop'] = [
         'data_bag[derps::ham]', 'data_bag[noodles::foop]'
       ]
-      node.set['attrbagger']['configs']['bork'] = ['data_bag[ack]']
+      node.normal['attrbagger']['configs']['bork'] = ['data_bag[ack]']
     end
   end
 
-  let(:updated_bones) { rand(100..199) }
+  let(:updated_buzz) { rand(100..199) }
 
   let :data_bags do
     {
       'derps' => {
         'ham' => {
-          'bones' => 9
+          'buzz' => 9,
+          'nerf' => true
         }
       },
       'noodles' => {
         'foop' => {
-          'bones' => updated_bones
+          'buzz' => updated_buzz
         }
       }
     }
@@ -32,8 +33,14 @@ describe 'attrbagger::default' do
     end
   end
 
-  it 'autoloads configs specified in attrbagger.configs' do
+  it 'merges attributes into the node based on bag configs' do
     chef_run.converge('attrbagger::default')
-    chef_run.node['flurb']['foop']['bones'].should == updated_bones
+    chef_run.node['flurb']['foop']['buzz'].should == updated_buzz
+    chef_run.node['flurb']['foop']['nerf'].should be_true
+  end
+
+  it 'ignores malformed data bag specifications' do
+    chef_run.converge('attrbagger::default')
+    chef_run.node['bork'].should be_nil
   end
 end

@@ -1,9 +1,8 @@
 # vim:fileencoding=utf-8
 
-require 'chef/mash'
 require 'chef/log'
 require 'chef/mixin/deep_merge'
-require 'chef/resource_collection'
+require 'chef/dsl/data_query'
 
 class Attrbagger
   include Chef::DSL::DataQuery
@@ -73,7 +72,7 @@ class Attrbagger
   end
 
   def load_config
-    top = Mash.new
+    top = {}
     @bag_cascade.each do |s|
       bag_item = load_data_bag_item_from_string(s)
       if !bag_item || !bag_item.empty?
