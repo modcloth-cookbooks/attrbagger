@@ -24,4 +24,4 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-Chef::Log.warn('The attrbagger cookbook is intended to be used as a library')
+Attrbagger.autoload!(self.run_context)

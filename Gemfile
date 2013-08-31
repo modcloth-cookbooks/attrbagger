@@ -1,4 +1,7 @@
 source 'https://rubygems.org'
 
-gem 'rspec'
-gem 'chef'
+group :development do
+  gem 'chefspec'
+  gem 'pry'
+  gem 'simplecov'
+end
