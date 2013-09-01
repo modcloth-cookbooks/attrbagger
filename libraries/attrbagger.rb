@@ -1,6 +1,6 @@
 # vim:fileencoding=utf-8
 
-require 'chef/client'
+require 'chef'
 require 'chef/dsl/data_query'
 require 'chef/log'
 require 'chef/mixin/deep_merge'
