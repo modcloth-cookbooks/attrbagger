@@ -23,7 +23,7 @@ describe Attrbagger do
   let(:base_config_name) { 'flurb' }
   let(:env_config_name) { 'flurb_demo' }
   let(:bag_cascade) do
-    ['data_bag[soup::flurb]', 'data_bag[soup::flurb_demo]']
+    ['data_bag_item[soup::flurb]', 'data_bag_item[soup::flurb_demo]']
   end
 
   let(:default_qwwx) { rand(300..399) }
@@ -35,11 +35,11 @@ describe Attrbagger do
     n.default['attrbagger'] = {
       'configs' => {
         'flurb::foop' => [
-          'data_bag[derps::ham]',
-          'data_bag[noodles::foop]',
-          "data_bag[app::config_<%= node['deployment_env'] %>::foop]"
+          'data_bag_item[derps::ham]',
+          'data_bag_item[noodles::foop]',
+          "data_bag_item[app::config_<%= node['deployment_env'] %>::foop]"
         ],
-        'bork' => ['data_bag[ack']
+        'bork' => ['data_bag_item[ack']
       },
       'precedence_level' => 'override'
     }
@@ -142,15 +142,15 @@ describe Attrbagger do
 
     before do
       loader.instance_variable_set(:@bag_cascade, [
-        'data_bag[fizz::buzz]',
-        'data_bag[foo::<%= node.name %>]'
+        'data_bag_item[fizz::buzz]',
+        'data_bag_item[foo::<%= node.name %>]'
       ])
     end
 
     it 'renders embedded ERB' do
       loader.expanded_bag_cascade.should == [
-        'data_bag[fizz::buzz]',
-        'data_bag[foo::nodersons]'
+        'data_bag_item[fizz::buzz]',
+        'data_bag_item[foo::nodersons]'
       ]
     end
 
