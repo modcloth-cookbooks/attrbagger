@@ -26,12 +26,12 @@ default_attributes(
     'precedence_level' => 'override',
     'configs' => {
       'example_app' => [
-        'data_bag[applications::base::example_app]',
-        'data_bag[applications::example_app]',
-        "data_bag[applications::config_<%= node['deployment_env'] %>::example_app]"
+        'data_bag_item[applications::base::example_app]',
+        'data_bag_item[applications::example_app]',
+        "data_bag_item[applications::config_<%= node['deployment_env'] %>::example_app]"
       ],
       'services::mail' => [
-        'data_bag[services::mail]'
+        'data_bag_item[services::mail]'
       ]
     }
   },

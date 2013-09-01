@@ -3,9 +3,9 @@ describe 'attrbagger::default' do
     ChefSpec::ChefRunner.new do |node|
       node.normal['flurb']['foop']['buzz'] = 2
       node.normal['attrbagger']['configs']['flurb::foop'] = [
-        'data_bag[derps::ham]', 'data_bag[noodles::foop]'
+        'data_bag_item[derps::ham]', 'data_bag_item[noodles::foop]'
       ]
-      node.normal['attrbagger']['configs']['bork'] = ['data_bag[ack]']
+      node.normal['attrbagger']['configs']['bork'] = ['data_bag_item[ack]']
     end
   end
 
