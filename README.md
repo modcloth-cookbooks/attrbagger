@@ -28,7 +28,7 @@ default_attributes(
       'example_app' => [
         'data_bag[applications::base::example_app]',
         'data_bag[applications::example_app]',
-        'data_bag[applications::config_<%= node['deployment_env'] %>::example_app]'
+        "data_bag[applications::config_<%= node['deployment_env'] %>::example_app]"
       ],
       'services::mail' => [
         'data_bag[services::mail]'
