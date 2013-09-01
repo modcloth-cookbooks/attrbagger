@@ -13,7 +13,7 @@ class Attrbagger
       log.info("Attrbagger auto-loading for #{run_context.node}")
       run_context.node['attrbagger']['configs'].each do |keyspec, bag_cascade|
         loader = Attrbagger.new(
-          run_context: run_context, bag_cascade: bag_cascade
+          run_context: run_context, bag_cascade: [*bag_cascade]
         )
         bag_config = loader.load_config
 

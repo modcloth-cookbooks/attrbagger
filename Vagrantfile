@@ -10,6 +10,7 @@ Vagrant.configure('2') do |config|
   config.ssh.timeout   = 120
 
   config.berkshelf.enabled = true
+  config.berkshelf.berksfile_path = 'Berksfile.vagrant'
 
   config.omnibus.chef_version = :latest
 
@@ -23,11 +24,12 @@ Vagrant.configure('2') do |config|
           'buzz' => 2
         }
       },
+      'fizz' => 'ham',
       'attrbagger' => {
         'autoload' => true,
         'configs' => {
           'flurb::foop' => [
-            'data_bag_item[derps::ham]',
+            "data_bag_item[derps::<%= node['fizz'] %>]",
             'data_bag_item[noodles::foop]'
           ],
           'bork' => [
@@ -38,7 +40,6 @@ Vagrant.configure('2') do |config|
     }
 
     chef.run_list = [
-      'recipe[chef_handler]',
       'recipe[attrbagger]',
       'recipe[attrbagger_example]',
       'recipe[minitest-handler]'

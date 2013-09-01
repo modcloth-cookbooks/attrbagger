@@ -24,13 +24,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-recipe = self
-
-ruby_block 'attrbagger_autoload' do
-  block do
-    if node['attrbagger']['autoload']
-      Attrbagger.autoload!(recipe.run_context)
-    end
-  end
-  action :nothing
-end.run_action(:create)
+if node['attrbagger']['autoload']
+  Chef::Log.info('recipe[attrbagger::default] running autoload')
+  Attrbagger.autoload!(self.run_context)
+end
