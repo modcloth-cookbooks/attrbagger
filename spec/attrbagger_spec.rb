@@ -5,7 +5,7 @@ require 'chef/mixin/deep_merge'
 describe Attrbagger do
   let :loader_from_base_and_env do
     described_class.new(
-      :context => run_context,
+      :run_context => run_context,
       :data_bag => data_bag_name,
       :base_config => base_config_name,
       :env_config => env_config_name
@@ -14,7 +14,7 @@ describe Attrbagger do
 
   let :loader_from_bag_cascade do
     described_class.new(
-      :context => run_context,
+      :run_context => run_context,
       :bag_cascade => bag_cascade
     )
   end
@@ -26,9 +26,36 @@ describe Attrbagger do
     ['data_bag[soup::flurb]', 'data_bag[soup::flurb_demo]']
   end
 
+  let(:default_qwwx) { rand(300..399) }
+
+  let :node do
+    n = Chef::Node.new
+    n.instance_variable_set(:@name, 'nodersons')
+    n.default['deployment_env'] = 'uat'
+    n.default['attrbagger'] = {
+      'configs' => {
+        'flurb::foop' => [
+          'data_bag[derps::ham]',
+          'data_bag[noodles::foop]',
+          "data_bag[app::config_<%= node['deployment_env'] %>::foop]"
+        ],
+        'bork' => ['data_bag[ack']
+      },
+      'precedence_level' => 'override'
+    }
+    n.default['flurb'] = {
+      'foop' => {
+        'bzzrt' => rand(0..99),
+        'qwwx' => default_qwwx
+      }
+    }
+    n
+  end
+
   let :run_context do
     double('run_context').tap do |ctx|
       ctx.stub(:log)
+      ctx.stub(:node => node)
     end
   end
 
@@ -63,8 +90,9 @@ describe Attrbagger do
 
   %w(base_and_env bag_cascade).each do |loader_type|
     subject(:loader) { send(:"loader_from_#{loader_type}") }
+
     before do
-      subject.stub(:data_bag_item) do |_, config|
+      loader.stub(:data_bag_item) do |_, config|
         case config
         when base_config_name
           base_data_bag_item_content
@@ -94,6 +122,7 @@ describe Attrbagger do
         let :run_context do
           double('run_context').tap do |ctx|
             ctx.stub(:log)
+            ctx.stub(:node => node)
           end
         end
 
@@ -105,6 +134,32 @@ describe Attrbagger do
           expect { loader.load_config }.to_not raise_error
         end
       end
+    end
+  end
+
+  context 'when expanding the bag cascade' do
+    subject(:loader) { loader_from_bag_cascade }
+
+    before do
+      loader.instance_variable_set(:@bag_cascade, [
+        'data_bag[fizz::buzz]',
+        'data_bag[foo::<%= node.name %>]'
+      ])
+    end
+
+    it 'renders embedded ERB' do
+      loader.expanded_bag_cascade.should == [
+        'data_bag[fizz::buzz]',
+        'data_bag[foo::nodersons]'
+      ]
+    end
+
+    it 'exposes run_context for rendering' do
+      loader.run_context.should == run_context
+    end
+
+    it 'exposes node for rendering' do
+      loader.node.should == node
     end
   end
 
@@ -148,26 +203,8 @@ describe Attrbagger do
       end
     end
 
-    let :node do
-      n = Chef::Node.new
-      n.instance_variable_set(:@name, 'nodersons')
-      n.default['attrbagger'] = {
-        'configs' => {
-          'flurb::foop' => ['data_bag[derps::ham]', 'data_bag[noodles::foop]'],
-          'bork' => ['data_bag[ack']
-        },
-        'precedence_level' => 'override'
-      }
-      n.default['flurb'] = {
-        'foop' => {
-          'bzzrt' => rand(0..99),
-          'qwwx' => 9
-        }
-      }
-      n
-    end
-
     let(:bag_bzzrt) { rand(100..199) }
+    let(:bag_boop) { rand(200..299) }
 
     let :data_bags do
       {
@@ -180,6 +217,18 @@ describe Attrbagger do
         'noodles' => {
           'foop' => {
             'bzzrt' => bag_bzzrt
+          }
+        },
+        'app' => {
+          'config_' => {
+            'foop' => {
+              'bzzrt' => 4
+            }
+          },
+          'config_uat' => {
+            'foop' => {
+              'boop' => bag_boop
+            }
           }
         }
       }
@@ -194,12 +243,17 @@ describe Attrbagger do
     it 'merges attributes into the node based on bag configs' do
       Attrbagger.autoload!(run_context)
       node['flurb']['foop']['bzzrt'].should == bag_bzzrt
-      node['flurb']['foop']['qwwx'].should == 9
+      node['flurb']['foop']['qwwx'].should == default_qwwx
     end
 
     it 'ignores malformed data bag specifications' do
       Attrbagger.autoload!(run_context)
       node['bork'].should be_nil
+    end
+
+    it 'renders bag cascade strings with ERB' do
+      Attrbagger.autoload!(run_context)
+      node['flurb']['foop']['boop'].should == bag_boop
     end
   end
 end
