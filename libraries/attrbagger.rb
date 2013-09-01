@@ -1,17 +1,19 @@
 # vim:fileencoding=utf-8
 
+require 'chef'
+require 'chef/dsl/data_query'
 require 'chef/log'
 require 'chef/mixin/deep_merge'
-require 'chef/dsl/data_query'
 
 class Attrbagger
   include Chef::DSL::DataQuery
 
   class << self
     def autoload!(run_context)
+      log.info("Attrbagger auto-loading for #{run_context.node}")
       run_context.node['attrbagger']['configs'].each do |keyspec, bag_cascade|
         loader = Attrbagger.new(
-          run_context: run_context, bag_cascade: bag_cascade
+          run_context: run_context, bag_cascade: [*bag_cascade]
         )
         bag_config = loader.load_config
 
@@ -31,8 +33,8 @@ class Attrbagger
           assign_to_keyspec(precedence_level, keyspec, new_value)
         end
 
-        log.info("Done auto-loading #{keyspec.inspect} => " <<
-                 "#{loader.expanded_bag_cascade.inspect}")
+        log.info("Attrbagger done auto-loading " <<
+                 "#{keyspec.inspect} => #{loader.expanded_bag_cascade.inspect}")
       end
     end
 

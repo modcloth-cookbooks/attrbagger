@@ -1,7 +1,8 @@
 source 'https://rubygems.org'
 
-group :development do
-  gem 'chefspec'
-  gem 'pry'
-  gem 'simplecov'
-end
+gem 'berkshelf'
+gem 'chef', '>= 11'
+gem 'foodcritic'
+gem 'pry'
+gem 'rspec'
+gem 'simplecov'
