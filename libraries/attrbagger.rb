@@ -33,8 +33,8 @@ class Attrbagger
           assign_to_keyspec(precedence_level, keyspec, new_value)
         end
 
-        log.info("Attrbagger done auto-loading #{keyspec.inspect} => " <<
-                 "#{loader.expanded_bag_cascade.inspect}")
+        log.info("Attrbagger done auto-loading " <<
+                 "#{keyspec.inspect} => #{loader.expanded_bag_cascade.inspect}")
       end
     end
 
