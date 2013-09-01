@@ -9,17 +9,18 @@ class Attrbagger
 
   class << self
     def autoload!(run_context)
-      run_context.node['attrbagger']['configs'].each do |key, bag_cascade|
-        bag_config = Attrbagger.new(
+      run_context.node['attrbagger']['configs'].each do |keyspec, bag_cascade|
+        loader = Attrbagger.new(
           run_context: run_context, bag_cascade: bag_cascade
-        ).load_config
+        )
+        bag_config = loader.load_config
 
         if bag_config && !bag_config.empty?
           precedence_level = run_context.node.send(
             run_context.node['attrbagger']['precedence_level'] || :override
           )
 
-          assignment_level = fetch_key_for_keyspec(key, run_context.node)
+          assignment_level = fetch_key_for_keyspec(keyspec, run_context.node)
           new_value = bag_config
           if assignment_level
             new_value = Chef::Mixin::DeepMerge.merge(
@@ -27,8 +28,11 @@ class Attrbagger
             )
           end
 
-          assign_to_keyspec(precedence_level, key, new_value)
+          assign_to_keyspec(precedence_level, keyspec, new_value)
         end
+
+        log.info("Done auto-loading #{keyspec.inspect} => " <<
+                 "#{loader.expanded_bag_cascade.inspect}")
       end
     end
 
@@ -53,7 +57,12 @@ class Attrbagger
       if !lookup.empty?
         hash_level = fetch_key_for_keyspec(lookup.join('::'), hash_level)
       end
+      log.debug("Assigning to #{keyspec.inspect} new value #{value.inspect}")
       hash_level[key] = value
+    end
+
+    def log
+      Chef::Log
     end
   end
 
@@ -83,9 +92,7 @@ class Attrbagger
   end
 
   def expanded_bag_cascade
-    @bag_cascade.map do |s|
-      ERB.new(s, 3).result(binding)
-    end
+    @bag_cascade.map { |s| render(s) }
   end
 
   def node
@@ -96,7 +103,16 @@ class Attrbagger
     @run_context
   end
 
+  def log
+    self.class.log
+  end
+
   private
+
+  def render(string)
+    ERB.new(string, 3).result(binding)
+  end
+
   def load_data_bag_item_from_string(bag_string)
     if bag_string =~ /^(.+)\[(.+)\]$/
       if $1 == 'data_bag_item'
@@ -105,12 +121,12 @@ class Attrbagger
           keyspec, load_data_bag_item(bag, item || bag)
         )
       else
-        Chef::Log.warn("Only 'data_bag_item' resources are supported by " <<
-                       "Attrbagger, not #{$1.inspect}.")
+        log.warn("Only 'data_bag_item' resources are supported by " <<
+                 "Attrbagger, not #{$1.inspect}.")
         return {}
       end
     else
-      Chef::Log.warn("Invalid resource specification string #{bag_string.inspect}.")
+      log.warn("Invalid resource specification string #{bag_string.inspect}.")
       nil
     end
   end
@@ -120,7 +136,7 @@ class Attrbagger
       %(id chef_type data_bag).include?(key)
     end
   rescue StandardError => e
-    Chef::Log.warn("#{e.class.name} #{e.message}")
+    log.warn("#{e.class.name} #{e.message}")
     {}
   end
 end

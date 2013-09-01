@@ -10,4 +10,4 @@ unless $LOAD_PATH.include?(chef_libraries)
 end
 
 require 'chef/log'
-Chef::Log.level = :error
+Chef::Log.level = ENV['DEBUG'] ? :debug : :error
