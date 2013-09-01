@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 
 gem 'berkshelf'
-gem 'chef'
+gem 'chef', '>= 11'
 gem 'foodcritic'
 gem 'pry'
 gem 'rspec'
