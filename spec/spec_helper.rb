@@ -9,4 +9,5 @@ unless $LOAD_PATH.include?(chef_libraries)
   $LOAD_PATH.unshift(chef_libraries)
 end
 
-ENV['QUIET'] = '1'
+require 'chef/log'
+Chef::Log.level = :error
