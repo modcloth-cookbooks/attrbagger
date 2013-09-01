@@ -24,4 +24,12 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-Attrbagger.autoload!(self.run_context)
+#attrbagger_handler = chef_handler('Chef::Handler::AttrbaggerHandler') do
+#  source File.expand_path('../../libraries/attrbagger_handler', __FILE__)
+#  supports report: true, exception: true
+#  action :nothing
+#end
+#
+#if node['attrbagger']['enabled']
+#  attrbagger_handler.run_action(:install)
+#end
