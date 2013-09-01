@@ -1,4 +1,6 @@
 /Gemfile.lock
 /Berksfile.lock
 /coverage/
-/vendor/
+/vendor/cookbooks/attrbagger/
+/vendor/cookbooks/chef_handler/
+/.vagrant/

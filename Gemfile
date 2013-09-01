@@ -1,8 +1,6 @@
 source 'https://rubygems.org'
 
-group :development do
-  gem 'berkshelf'
-  gem 'chefspec'
-  gem 'pry'
-  gem 'simplecov'
-end
+gem 'berkshelf'
+gem 'pry'
+gem 'rspec'
+gem 'simplecov'

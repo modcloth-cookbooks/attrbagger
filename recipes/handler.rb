@@ -1,6 +1,6 @@
 #
 # Cookbook Name:: attrbagger
-# Recipe:: default
+# Recipe:: handler
 #
 # Copyright 2013, ModCloth, Inc.
 #
@@ -26,11 +26,28 @@
 
 recipe = self
 
-ruby_block 'attrbagger_autoload' do
+attrbagger_handler_file = ::File.join(
+  node['chef_handler']['handler_path'], 'attrbagger_handler.rb'
+)
+
+cookbook_file attrbagger_handler_file do
+  source 'handlers/attrbagger_handler.rb'
+  mode 0640
+  action :nothing
+end.run_action(:create)
+
+chef_handler('Chef::Handler::AttrbaggerHandler') do
+  source attrbagger_handler_file
+  arguments run_context: recipe.run_context, autoload: node['attrbagger']['autoload']
+  supports start: true
+  action :nothing
+end.run_action(:enable)
+
+ruby_block 're-run start handlers' do
   block do
-    if node['attrbagger']['autoload']
-      Attrbagger.autoload!(recipe.run_context)
-    end
+    require 'chef/run_status'
+    require 'chef/handler'
+    Chef::Handler.run_start_handlers(nil)
   end
   action :nothing
 end.run_action(:create)
