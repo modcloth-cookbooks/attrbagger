@@ -24,4 +24,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-Attrbagger.autoload!(self.run_context)
+if node['attrbagger']['autoload']
+  Chef::Log.info('recipe[attrbagger::default] running autoload')
+  Attrbagger.autoload!(self.run_context)
+end
