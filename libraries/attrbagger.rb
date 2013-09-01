@@ -65,8 +65,8 @@ class Attrbagger
       @bag_cascade = options[:bag_cascade]
     else
       @bag_cascade = [
-        "data_bag[#{options.fetch(:data_bag)}::#{options.fetch(:base_config)}]",
-        "data_bag[#{options.fetch(:data_bag)}::#{options.fetch(:env_config)}}]"
+        "data_bag_item[#{options.fetch(:data_bag)}::#{options.fetch(:base_config)}]",
+        "data_bag_item[#{options.fetch(:data_bag)}::#{options.fetch(:env_config)}}]"
       ]
     end
   end
@@ -99,14 +99,14 @@ class Attrbagger
   private
   def load_data_bag_item_from_string(bag_string)
     if bag_string =~ /^(.+)\[(.+)\]$/
-      if $1 == 'data_bag'
+      if $1 == 'data_bag_item'
         bag, item, keyspec = $2.split('::', 3)
         self.class.fetch_key_for_keyspec(
           keyspec, load_data_bag_item(bag, item || bag)
         )
       else
-        Chef::Log.warn("Only 'data_bag' resources are supported by Attrbagger, " <<
-                       "not #{$1.inspect}.")
+        Chef::Log.warn("Only 'data_bag_item' resources are supported by " <<
+                       "Attrbagger, not #{$1.inspect}.")
         return {}
       end
     else
