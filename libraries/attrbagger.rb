@@ -11,7 +11,7 @@ class Attrbagger
     def autoload!(run_context)
       run_context.node['attrbagger']['configs'].each do |key, bag_cascade|
         bag_config = Attrbagger.new(
-          context: run_context, bag_cascade: bag_cascade
+          run_context: run_context, bag_cascade: bag_cascade
         ).load_config
 
         if bag_config && !bag_config.empty?
@@ -60,7 +60,7 @@ class Attrbagger
   attr_reader :bag_cascade
 
   def initialize(options = {})
-    @context = options.fetch(:context)
+    @run_context = options.fetch(:run_context)
     if options[:bag_cascade]
       @bag_cascade = options[:bag_cascade]
     else
@@ -73,13 +73,27 @@ class Attrbagger
 
   def load_config
     top = {}
-    @bag_cascade.each do |s|
+    expanded_bag_cascade.each do |s|
       bag_item = load_data_bag_item_from_string(s)
       if !bag_item || !bag_item.empty?
         top.merge!(Chef::Mixin::DeepMerge.merge(top, bag_item))
       end
     end
     top.empty? ? nil : top
+  end
+
+  def expanded_bag_cascade
+    @bag_cascade.map do |s|
+      ERB.new(s, 3).result(binding)
+    end
+  end
+
+  def node
+    @run_context.node
+  end
+
+  def run_context
+    @run_context
   end
 
   private
@@ -91,12 +105,12 @@ class Attrbagger
           keyspec, load_data_bag_item(bag, item || bag)
         )
       else
-        errlog("Only 'data_bag' resources are supported by Attrbagger, " <<
-               "not #{$1.inspect}.")
+        Chef::Log.warn("Only 'data_bag' resources are supported by Attrbagger, " <<
+                       "not #{$1.inspect}.")
         return {}
       end
     else
-      errlog("Invalid resource specification string #{bag_string.inspect}.")
+      Chef::Log.warn("Invalid resource specification string #{bag_string.inspect}.")
       nil
     end
   end
@@ -106,14 +120,7 @@ class Attrbagger
       %(id chef_type data_bag).include?(key)
     end
   rescue StandardError => e
-    errlog("#{e.class.name} #{e.message}")
+    Chef::Log.warn("#{e.class.name} #{e.message}")
     {}
-  end
-
-  def errlog(msg)
-    unless ENV['QUIET']
-      $stderr.puts msg
-      Chef::Log.error(msg)
-    end
   end
 end
