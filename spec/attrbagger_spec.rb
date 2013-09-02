@@ -34,12 +34,15 @@ describe Attrbagger do
     n.default['deployment_env'] = 'uat'
     n.default['attrbagger'] = {
       'configs' => {
-        'flurb::foop' => [
-          'data_bag_item[derps::ham]',
-          'data_bag_item[noodles::foop]',
-          "data_bag_item[app::config_<%= node['deployment_env'] %>::foop]"
-        ],
-        'bork' => ['data_bag_item[ack']
+        'flurb::foop' => {
+          'precedence_level' => 'override',
+          'bag_cascade' => [
+            'data_bag_item[derps::ham]',
+            'data_bag_item[noodles::foop]',
+            "data_bag_item[app::config_<%= node['deployment_env'] %>::foop]"
+          ],
+        },
+        'bork' => {'bag_cascade' => ['data_bag_item[ack']}
       },
       'precedence_level' => 'override'
     }
