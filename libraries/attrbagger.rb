@@ -11,18 +11,18 @@ class Attrbagger
   class << self
     def autoload!(run_context)
       log.info("Attrbagger auto-loading for #{run_context.node}")
-      run_context.node['attrbagger']['configs'].each do |keyspec, bag_cascade|
+      run_context.node['attrbagger']['configs'].each do |keyspec, config|
         loader = Attrbagger.new(
-          run_context: run_context, bag_cascade: [*bag_cascade]
+          run_context: run_context, bag_cascade: [*config['bag_cascade']]
         )
         bag_config = loader.load_config
 
         if bag_config && !bag_config.empty?
           precedence_level = run_context.node.send(
-            run_context.node['attrbagger']['precedence_level'] || :override
+            config['precedence_level'] || :override
           )
 
-          assignment_level = fetch_key_for_keyspec(keyspec, run_context.node)
+          assignment_level = fetch_key_for_keyspec(keyspec, precedence_level)
           new_value = bag_config
           if assignment_level
             new_value = Chef::Mixin::DeepMerge.merge(

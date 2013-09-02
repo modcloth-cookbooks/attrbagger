@@ -28,13 +28,19 @@ Vagrant.configure('2') do |config|
       'attrbagger' => {
         'autoload' => true,
         'configs' => {
-          'flurb::foop' => [
-            "data_bag_item[derps::<%= node['fizz'] %>]",
-            'data_bag_item[noodles::foop]'
-          ],
-          'bork' => [
-            'data_bag_item[ack]'
-          ]
+          'flurb::foop' => {
+            'precedence_level' => 'override',
+            'bag_cascade' => [
+              "data_bag_item[derps::<%= node['fizz'] %>]",
+              'data_bag_item[noodles::foop]'
+            ]
+          },
+          'bork' => {
+            'precedence_level' => 'normal',
+            'bag_cascade' => [
+              'data_bag_item[ack]'
+            ]
+          }
         }
       }
     }
