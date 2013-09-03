@@ -5,3 +5,4 @@
 /vendor/cookbooks/attrbagger/
 /vendor/cookbooks/chef_handler/
 /.vagrant/
+/metadata.json
