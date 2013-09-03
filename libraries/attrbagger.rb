@@ -19,7 +19,7 @@ class Attrbagger
 
         if bag_config && !bag_config.empty?
           precedence_level = run_context.node.send(
-            config['precedence_level'] || :override
+            config['precedence_level'] || node['attrbagger']['precedence_level']
           )
 
           assignment_level = fetch_key_for_keyspec(keyspec, precedence_level)
