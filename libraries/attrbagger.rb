@@ -1,4 +1,4 @@
-# vim:fileencoding=utf-8
+# encoding: utf-8
 
 require 'chef'
 require 'chef/dsl/data_query'
@@ -19,7 +19,8 @@ class Attrbagger
 
         if bag_config && !bag_config.empty?
           precedence_level = run_context.node.send(
-            config['precedence_level'] || node['attrbagger']['precedence_level']
+            config['precedence_level'] ||
+              run_context.node['attrbagger']['precedence_level']
           )
 
           assignment_level = fetch_key_for_keyspec(keyspec, precedence_level)
