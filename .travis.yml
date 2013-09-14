@@ -17,4 +17,4 @@ script:
 notifications:
   email:
     recipients:
-    - d.buch+attrbagger-cookbook@modcloth.com
+    - github+attrbagger-cookbook@modcloth.com
